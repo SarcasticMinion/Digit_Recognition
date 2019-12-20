@@ -7,7 +7,7 @@ from torch.utils import data
 
 class BasicNN(nn.Module):
 
-    def __init__(self, optimizer, loss_fxn, neural_net, trainset):
+    def __init__(self, optimizer, loss_fxn, neural_net, trainset, conv_flag = False):
 
         super().__init__()
         self.optimizer = optimizer
@@ -60,26 +60,31 @@ if __name__ == '__main__':
                                          shuffle=True)
     valset_generator = data.DataLoader(mnist_valset, batch_size=64,
                                        shuffle=True)
-
-    input_length = 28 * 28
-    hidden_layers = [256, 128, 64]
-    output_length = 10
+    
+    # input_length = 28 * 28
+    # hidden_layers = [256, 128, 64]
+    # output_length = 10
 
     # temp = iter(mnist_trainset)
     # images, labels = next(temp)
     # plt.imshow(images[0].numpy().squeeze(), cmap='gray_r')
     # plt.show()
-    neuralnet = nn.Sequential(nn.Linear(input_length, hidden_layers[0]),
-                              nn.ReLU(), nn.Linear(hidden_layers[0], hidden_layers[1]),
-                              nn.ReLU(), nn.Linear(hidden_layers[1], hidden_layers[2]),
-                              nn.ReLU(), nn.Linear(hidden_layers[2], output_length),
-                              nn.LogSoftmax(dim=1))
 
-    loss_fxn = nn.NLLLoss()
-    optimizer = optim.SGD(neuralnet.parameters(), lr=0.01)
+    # neuralnet = nn.Sequential(nn.Linear(input_length, hidden_layers[0]),
+    #                           nn.ReLU(), nn.Linear(hidden_layers[0], hidden_layers[1]),
+    #                           nn.ReLU(), nn.Linear(hidden_layers[1], hidden_layers[2]),
+    #                           nn.ReLU(), nn.Linear(hidden_layers[2], output_length),
+    #                           nn.LogSoftmax(dim=1))
 
-    my_training = BasicNN(optimizer, loss_fxn, neuralnet, trainset_generator)
-    my_training.training_pass(35)
-    my_training.validation_pass(valset_generator)
-    print(my_training.train_loss / len(trainset_generator))
-    print(100 * my_training.accuracy)
+
+    # loss_fxn = nn.NLLLoss()
+    # optimizer = optim.SGD(neuralnet.parameters(), lr=0.01)
+
+    # my_training = BasicNN(optimizer, loss_fxn, neuralnet, trainset_generator)
+    # my_training.training_pass(35)
+    # my_training.validation_pass(valset_generator)
+    # print(my_training.train_loss / len(trainset_generator))
+    # print(100 * my_training.accuracy)
+
+    neuralnet = nn.Sequential(nn.Conv2D(), nn.ReLu(),
+                              nn.MaxPool2d(), nn.Linear())
