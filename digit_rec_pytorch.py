@@ -7,7 +7,8 @@ from torch.utils import data
 
 class BasicNN(nn.Module):
 
-    def __init__(self, optimizer, loss_fxn, neural_net, trainset, conv_flag = False):
+    def __init__(self, optimizer, loss_fxn, neural_net,
+                 trainset, conv_flag=False):
 
         super().__init__()
         self.optimizer = optimizer
@@ -30,6 +31,7 @@ class BasicNN(nn.Module):
         self.train_loss = 0
         for e in range(epochs):
             for images, labels in self.trainset:
+                print(images.size())
                 loss = self.one_epoch(images, labels)[1]
                 self.train_loss += loss.item()
 
@@ -48,25 +50,30 @@ class BasicNN(nn.Module):
 
 if __name__ == '__main__':
 
-    transform_mnist = transforms.Compose([transforms.ToTensor(),
-                                         transforms.Normalize((0.5,), (0.5,))])
-    mnist_trainset = datasets.MNIST('/home/minion/Documents/Machine',
+    path_to_database = "/mnt/data/Current_Work/minion/Documents/" \
+        "Digit_Recognition"
+
+    transform_mnist = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,))])
+    mnist_trainset = datasets.MNIST(path_to_database,
                                     download=False, train=True,
                                     transform=transform_mnist)
-    mnist_valset = datasets.MNIST('/home/minion/Documents/Machine',
+    mnist_valset = datasets.MNIST(path_to_database,
                                   download=False, train=False,
                                   transform=transform_mnist)
     trainset_generator = data.DataLoader(mnist_trainset, batch_size=64,
                                          shuffle=True)
     valset_generator = data.DataLoader(mnist_valset, batch_size=64,
                                        shuffle=True)
-    
+
     # input_length = 28 * 28
     # hidden_layers = [256, 128, 64]
     # output_length = 10
 
     # temp = iter(mnist_trainset)
     # images, labels = next(temp)
+    # print(images.size())
     # plt.imshow(images[0].numpy().squeeze(), cmap='gray_r')
     # plt.show()
 
@@ -75,16 +82,15 @@ if __name__ == '__main__':
     #                           nn.ReLU(), nn.Linear(hidden_layers[1], hidden_layers[2]),
     #                           nn.ReLU(), nn.Linear(hidden_layers[2], output_length),
     #                           nn.LogSoftmax(dim=1))
+    neuralnet = nn.Sequential(nn.Conv2d(1, 1, 5), nn.ReLU(),
+                              nn.MaxPool2d(2, 2), nn.Linear(144, 10),
+                              nn.LogSoftmax(dim=1))
 
+    loss_fxn = nn.NLLLoss()
+    optimizer = optim.SGD(neuralnet.parameters(), lr=0.01)
 
-    # loss_fxn = nn.NLLLoss()
-    # optimizer = optim.SGD(neuralnet.parameters(), lr=0.01)
-
-    # my_training = BasicNN(optimizer, loss_fxn, neuralnet, trainset_generator)
-    # my_training.training_pass(35)
-    # my_training.validation_pass(valset_generator)
-    # print(my_training.train_loss / len(trainset_generator))
-    # print(100 * my_training.accuracy)
-
-    neuralnet = nn.Sequential(nn.Conv2D(), nn.ReLu(),
-                              nn.MaxPool2d(), nn.Linear())
+    my_training = BasicNN(optimizer, loss_fxn, neuralnet, trainset_generator)
+    my_training.training_pass(13)
+    my_training.validation_pass(valset_generator)
+    print(my_training.train_loss / len(trainset_generator))
+    print(100 * my_training.accuracy)
