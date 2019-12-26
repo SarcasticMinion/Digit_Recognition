@@ -28,17 +28,17 @@ class BasicNN(nn.Module):
         return output, loss
 
     def training_pass(self, epochs):
-        self.train_loss = 0
         for e in range(epochs):
+            self.train_loss = 0
             for images, labels in self.trainset:
                 loss = self.one_epoch(images, labels)[1]
                 self.train_loss += loss.item()
 
-    def validation_pass(self, valset):
+    def test_pass(self, testset):
         test_results = 0
         total_labels = 0
         with torch.no_grad():
-            for images, labels in valset:
+            for images, labels in testset:
                 images = images.view(images.shape[0], -1)
                 output = self.net(images)
                 _, prediction = torch.max(output.data, 1)
@@ -58,13 +58,13 @@ if __name__ == '__main__':
     mnist_trainset = datasets.MNIST(path_to_database,
                                     download=False, train=True,
                                     transform=transform_mnist)
-    mnist_valset = datasets.MNIST(path_to_database,
-                                  download=False, train=False,
-                                  transform=transform_mnist)
+    mnist_testset = datasets.MNIST(path_to_database,
+                                   download=False, train=False,
+                                   transform=transform_mnist)
     trainset_generator = data.DataLoader(mnist_trainset, batch_size=64,
                                          shuffle=True)
-    valset_generator = data.DataLoader(mnist_valset, batch_size=64,
-                                       shuffle=True)
+    testset_generator = data.DataLoader(mnist_testset, batch_size=64,
+                                        shuffle=True)
 
     input_length = 28 * 28
     hidden_layers = [256, 128, 64]
@@ -90,6 +90,7 @@ if __name__ == '__main__':
 
     my_training = BasicNN(optimizer, loss_fxn, neuralnet, trainset_generator)
     my_training.training_pass(1)
-    my_training.validation_pass(valset_generator)
+    my_training.train_pass(testset_generator)
+    my_training.test_pass(testset_generator)
     print(my_training.train_loss / len(trainset_generator))
     print(100 * my_training.accuracy)
