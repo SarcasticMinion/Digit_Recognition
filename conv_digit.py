@@ -1,7 +1,7 @@
 import torch
 from torchvision import datasets, transforms
 from torch import nn, optim
-from torch import functional as F
+from torch.nn import functional as F
 from torch.utils import data
 # from matplotlib import pyplot as plt
 
